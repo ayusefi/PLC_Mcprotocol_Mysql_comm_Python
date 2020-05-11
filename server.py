@@ -8,13 +8,10 @@ import logging
 import concurrent.futures
 import time
 from datetime import datetime
+import json
 
 # Function called for each plc
 def thread_function1(plc):
-
-    plc_id=plc[0]
-    plc_ip=plc[1]
-    plc_port=plc[2]
 
     # Continue running until user/system terminates program (Ctrl+C)
     while True:
@@ -34,13 +31,13 @@ def thread_function1(plc):
             time.sleep(plc[4]/1000)
 
             # Establishing connection to PLC
-            mcprotocol.config.DESTINATION_IP = plc_ip
-            mcprotocol.config.DESTINATION_PORT = plc_port
+            mcprotocol.config.DESTINATION_IP = plc[1]
+            mcprotocol.config.DESTINATION_PORT = plc[2]
             mcprotocol.config.PROTOCOL = Protocol.TCP_IP
 
             # Query to read addresses from table Device_Description
             mycursor2 = mydb.cursor()
-            mycursor2.execute("SELECT * FROM Device_Description WHERE PLC_ID=" + str(plc_id))
+            mycursor2.execute("SELECT * FROM Device_Description WHERE PLC_ID=" + str(plc[0]))
             address_array = mycursor2.fetchall()
             
             # Read value of each address from PLC
@@ -70,7 +67,7 @@ def thread_function1(plc):
                     # Show message in terminal
                     logging.info("Value %d inserted to PLC %d label %s at %s", address_value[0], address[0], address[1], formatted_date)
         except:
-            print("unable to connect to plc ",plc_id)
+            print("unable to connect to plc ",plc[0])
             pass
 
         # Close connection to mysql
@@ -78,12 +75,16 @@ def thread_function1(plc):
 
 if __name__ == "__main__":
 
-    # Connect to PLC to read values from table PLCs
+    # Read database info from json file
+    with open('databse_info.json') as json_file:
+        database_info = json.load(json_file)
+
+    # Connect to database
     mydb = mysql.connector.connect(
-    host="localhost",
-    user="root",
-    passwd="Memak123",
-    database="mydb"
+        host = database_info['host'],
+        user = database_info['user'],
+        passwd = database_info['password'],
+        database = database_info['database']
     )
 
     # Format the message shown in terminal
