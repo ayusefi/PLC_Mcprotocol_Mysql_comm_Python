@@ -20,13 +20,11 @@ def thread_function1(plc):
         mydb = mysql.connector.connect(
         host="localhost",
         user="root",
-        passwd="Memak123",
         database="mydb"
         )
-
+        
         # Tries the program if connection established and passes to loop otherwise
         try:
-
             # Runs program for each plc based on their specified interval
             time.sleep(plc[4]/1000)
 
@@ -34,44 +32,79 @@ def thread_function1(plc):
             mcprotocol.config.DESTINATION_IP = plc[1]
             mcprotocol.config.DESTINATION_PORT = plc[2]
             mcprotocol.config.PROTOCOL = Protocol.TCP_IP
-
+            mc_proc = mcprotocol.MCProtocol(cpu_type= CpuType.FX5UCPU)
+	
             # Query to read addresses from table Device_Description
             mycursor2 = mydb.cursor()
             mycursor2.execute("SELECT * FROM Device_Description WHERE PLC_ID=" + str(plc[0]))
             address_array = mycursor2.fetchall()
-            
+
             # Read value of each address from PLC
             for address in address_array:
-                mc_proc = mcprotocol.MCProtocol(cpu_type= CpuType.FX5UCPU)
                 address_value = mc_proc.get_device(address[1], FxDataType.Signed16)
 
-                # Query to read values of current address from table Device_Log and select the last one
-                mycursor3 = mydb.cursor()
-                mycursor3.execute("SELECT Value FROM Device_Log WHERE PLC_ID=" + str(address[0]) + " AND Label='" + str(address[1]) + "'")
+                if address_value is None:
+                    print("unable to connect to plc ", plc[0])
+                    break
+                else:
+                    # Query to read values of current address from table Device_Log and select the last one
+                    mycursor3 = mydb.cursor()
+                    mycursor3.execute("SELECT Value FROM Device_Log WHERE PLC_ID=" + str(address[0]) + " AND Label='" + str(address[1]) + "'")
+                    eval_result = mycursor3.fetchall()
 
-                eval_result = mycursor3.fetchall()
-                last_value = eval_result[len(eval_result) - 1][0]
+                    if len(eval_result) <= 0:
+                        # Connect to PLC to read/insert values from/into table Device_Description/Device_Log
+                        mydb3 = mysql.connector.connect(
+                            host="localhost",
+                            user="root",
+                            database="mydb"
+                            )
 
-                # Check if last value and current value are different
-                if last_value != address_value[0]:
+                        # Record current date and time
+                        now = datetime.now()
+                        formatted_date = now.strftime('%Y-%m-%d %H:%M:%S')
 
-                    # Record current date and time
-                    now = datetime.now()
-                    formatted_date = now.strftime('%Y-%m-%d %H:%M:%S')
+                        # Query to insert current value into table Device_Log
+                        mycursor4 = mydb3.cursor()
+                        mycursor4.execute('INSERT INTO Device_Log (PLC_ID, Label, Value, Date_Time) VALUES(%s, %s, %s, %s)', (address[0], address[1], address_value[0], formatted_date))
+                        mydb3.commit()
 
-                    # Query to insert current value into table Device_Log
-                    mycursor4 = mydb.cursor()
-                    mycursor4.execute('INSERT INTO Device_Log (PLC_ID, Label, Value, Date_Time) VALUES(%s, %s, %s, %s)', (address[0], address[1], address_value[0], formatted_date))
-                    mydb.commit()
+                        # Show message in terminal
+                        logging.info("Value %d inserted to PLC %d label %s at %s", address_value[0], address[0], address[1], formatted_date)
+                    else:
+                        last_value = eval_result[len(eval_result) - 1][0]
 
-                    # Show message in terminal
-                    logging.info("Value %d inserted to PLC %d label %s at %s", address_value[0], address[0], address[1], formatted_date)
-        except:
-            print("unable to connect to plc ",plc[0])
+                        # Check if last value and current value are different
+                        if last_value != address_value[0]:
+
+                            # Connect to PLC to read/insert values from/into table Device_Description/Device_Log
+                            mydb3 = mysql.connector.connect(
+                                host="localhost",
+                                user="root",
+                                database="mydb"
+                                )
+
+                            # Record current date and time
+                            now = datetime.now()
+                            formatted_date = now.strftime('%Y-%m-%d %H:%M:%S')
+
+                            # Query to insert current value into table Device_Log
+                            mycursor4 = mydb3.cursor()
+                            mycursor4.execute('INSERT INTO Device_Log (PLC_ID, Label, Value, Date_Time) VALUES(%s, %s, %s, %s)', (address[0], address[1], address_value[0], formatted_date))
+                            mydb3.commit()
+
+                            # Show message in terminal
+                            logging.info("Value %d inserted to PLC %d label %s at %s", address_value[0], address[0], address[1], formatted_date)
+                        else:
+                            continue
+
+            # Close connection to mysql
+            mydb.close()
+            
+        except Exception as exc:
+            print(exc)
             pass
 
-        # Close connection to mysql
-        mydb.close()
 
 if __name__ == "__main__":
 
@@ -83,7 +116,6 @@ if __name__ == "__main__":
     mydb = mysql.connector.connect(
         host = database_info['host'],
         user = database_info['user'],
-        passwd = database_info['password'],
         database = database_info['database']
     )
 
@@ -98,6 +130,7 @@ if __name__ == "__main__":
     plcs_array = mycursor.fetchall()
     
     # Parallel thread for each plc in table PLCs
-    executor = concurrent.futures.ProcessPoolExecutor(10)
+    executor = concurrent.futures.ProcessPoolExecutor(max_workers=60)
     futures = [executor.submit(thread_function1, item) for item in plcs_array]
     concurrent.futures.wait(futures)
+
