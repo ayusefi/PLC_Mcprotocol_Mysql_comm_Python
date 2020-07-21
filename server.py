@@ -42,6 +42,7 @@ def thread_function1(plc):
             # Read value of each address from PLC
             for address in address_array:
                 address_value = mc_proc.get_device(address[1], FxDataType.Signed16)
+<<<<<<< HEAD
                 # print(address[1], address_value)
                 calc_col = address[4]
                 if calc_col is not None:
@@ -49,6 +50,8 @@ def thread_function1(plc):
                     replaced_calc_col_result = eval(replaced_calc_col)
                     # print(replaced_calc_col_result)
                     address_value[0] = replaced_calc_col_result
+=======
+>>>>>>> 8fd66363b9aece904df8c90c3b34f3b66034f833
 
                 if address_value is None:
                     print("unable to connect to plc ", plc[0])
@@ -77,7 +80,11 @@ def thread_function1(plc):
                         mydb3.commit()
 
                         # Show message in terminal
+<<<<<<< HEAD
                         logging.info("Value %.2f inserted to PLC %d label %s at %s", address_value[0], address[0], address[1], formatted_date)
+=======
+                        logging.info("Value %d inserted to PLC %d label %s at %s", address_value[0], address[0], address[1], formatted_date)
+>>>>>>> 8fd66363b9aece904df8c90c3b34f3b66034f833
                     else:
                         last_value = eval_result[len(eval_result) - 1][0]
 
@@ -101,7 +108,11 @@ def thread_function1(plc):
                             mydb3.commit()
 
                             # Show message in terminal
+<<<<<<< HEAD
                             logging.info("Value %.2f inserted to PLC %d label %s at %s", address_value[0], address[0], address[1], formatted_date)
+=======
+                            logging.info("Value %d inserted to PLC %d label %s at %s", address_value[0], address[0], address[1], formatted_date)
+>>>>>>> 8fd66363b9aece904df8c90c3b34f3b66034f833
                         else:
                             continue
 
