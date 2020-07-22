@@ -16,6 +16,8 @@ from enum import Enum, auto, IntEnum
 
 from .classes import CPUSeries
 
+from bitstring import BitArray
+
 
 class FxDeviceType(IntEnum):
     InputSignal = 0x9C,             # 入力 [X]
@@ -320,7 +322,12 @@ class FxDevice:
             byte_data = bytes(array)        # 多くても怒られる →つまりbyte 数が4 の倍数である必用がある
             self.__value = float(struct.unpack('f', byte_data[:4])[0])
         elif self.__fx_data_type == FxDataType.Bit:
-            self.__value = int.from_bytes(byte_data[:2],'little', signed=True)  # temporary Bitは16bitと同じにする
+            val_str = str(byte_data[:1][0])
+            c = BitArray(hex=val_str)
+            binary_val = c.bin
+            bool_val = c.bin[3]
+            self.__value = bool_val
+            #self.__value = int.from_bytes(byte_data[:2],'little', signed=True)  # temporary Bitは16bitと同じにする
         pass
 
 

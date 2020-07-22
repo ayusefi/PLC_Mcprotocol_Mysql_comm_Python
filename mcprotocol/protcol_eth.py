@@ -17,6 +17,7 @@ def get_device_list(start_device: str, device_count: int, fx_datatype: FxDataTyp
         extention= fx_dev.is_extended_device))
     rqst_bytes.extend(tools.Eth.get_device_bytes(fx_dev))       # 開始デバイスを示すバイト列
 
+
     word_length = fx_datatype.get_word_length() * device_count  # デバイス点数(2byte) 
     rqst_bytes.extend(word_length.to_bytes(2, 'little'))        # 三菱の仕様から察するに，ここでの「デバイス」はint16の事　本来ならばword数と言うべき。
 

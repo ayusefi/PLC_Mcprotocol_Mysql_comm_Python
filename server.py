@@ -41,17 +41,20 @@ def thread_function1(plc):
 
             # Read value of each address from PLC
             for address in address_array:
-                address_value = mc_proc.get_device(address[1], FxDataType.Signed16)
-<<<<<<< HEAD
-                # print(address[1], address_value)
+                if address[1][0] == "Y":
+                    address_oct = address[1][1:]
+                    address_dec = int(address_oct, 8)
+                    address_new = 'Y' + str(address_dec)
+                    address_value = mc_proc.get_device(address_new, fx_data_type = FxDataType.Bit)
+                else:
+                    address_value = mc_proc.get_device(address[1], FxDataType.Signed16)
+                #print(address[1], address_value)
                 calc_col = address[4]
                 if calc_col is not None:
                     replaced_calc_col = calc_col.replace("x",str(address_value[0]))
                     replaced_calc_col_result = eval(replaced_calc_col)
                     # print(replaced_calc_col_result)
                     address_value[0] = replaced_calc_col_result
-=======
->>>>>>> 8fd66363b9aece904df8c90c3b34f3b66034f833
 
                 if address_value is None:
                     print("unable to connect to plc ", plc[0])
@@ -80,17 +83,14 @@ def thread_function1(plc):
                         mydb3.commit()
 
                         # Show message in terminal
-<<<<<<< HEAD
-                        logging.info("Value %.2f inserted to PLC %d label %s at %s", address_value[0], address[0], address[1], formatted_date)
-=======
-                        logging.info("Value %d inserted to PLC %d label %s at %s", address_value[0], address[0], address[1], formatted_date)
->>>>>>> 8fd66363b9aece904df8c90c3b34f3b66034f833
+                        logging.info("Value %.2f inserted to PLC %d label %s at %s", float(address_value[0]), address[0], address[1], formatted_date)
+                        # logging.info("Value %d inserted to PLC %d label %s at %s", address_value[0], address[0], address[1], formatted_date)
                     else:
                         last_value = eval_result[len(eval_result) - 1][0]
 
                         # Check if last value and current value are different
-                        if last_value != address_value[0]:
 
+                        if last_value != float(address_value[0]):
                             # Connect to PLC to read/insert values from/into table Device_Description/Device_Log
                             mydb3 = mysql.connector.connect(
                                 host="localhost",
@@ -108,11 +108,8 @@ def thread_function1(plc):
                             mydb3.commit()
 
                             # Show message in terminal
-<<<<<<< HEAD
-                            logging.info("Value %.2f inserted to PLC %d label %s at %s", address_value[0], address[0], address[1], formatted_date)
-=======
-                            logging.info("Value %d inserted to PLC %d label %s at %s", address_value[0], address[0], address[1], formatted_date)
->>>>>>> 8fd66363b9aece904df8c90c3b34f3b66034f833
+                            logging.info("Value %.2f inserted to PLC %d label %s at %s", float(address_value[0]), address[0], address[1], formatted_date)
+                            # logging.info("Value %d inserted to PLC %d label %s at %s", address_value[0], address[0], address[1], formatted_date)
                         else:
                             continue
 
