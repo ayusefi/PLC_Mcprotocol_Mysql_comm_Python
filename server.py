@@ -44,7 +44,10 @@ def thread_function1(plc):
                 if address[1][0] == "Y" or address[1][0] == "X":
                     address_oct = address[1][1:]
                     address_dec = int(address_oct, 8)
-                    address_new = 'Y' + str(address_dec)
+                    if address[1][0] == "Y":
+                        address_new = 'Y' + str(address_dec)
+                    else:
+                        address_new = 'X' + str(address_dec)
                     address_value = mc_proc.get_device(address_new, fx_data_type = FxDataType.Bit)
                 elif address[1][0] == "M":
                     address_value = mc_proc.get_device(address[1], fx_data_type = FxDataType.Bit)
