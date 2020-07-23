@@ -41,11 +41,13 @@ def thread_function1(plc):
 
             # Read value of each address from PLC
             for address in address_array:
-                if address[1][0] == "Y":
+                if address[1][0] == "Y" or address[1][0] == "X":
                     address_oct = address[1][1:]
                     address_dec = int(address_oct, 8)
                     address_new = 'Y' + str(address_dec)
                     address_value = mc_proc.get_device(address_new, fx_data_type = FxDataType.Bit)
+                elif address[1][0] == "M":
+                    address_value = mc_proc.get_device(address[1], fx_data_type = FxDataType.Bit)
                 else:
                     address_value = mc_proc.get_device(address[1], FxDataType.Signed16)
                 #print(address[1], address_value)

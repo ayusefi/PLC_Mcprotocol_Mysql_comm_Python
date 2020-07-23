@@ -22,12 +22,12 @@ while True:
 #    ret_wr = mc_proc.set_device('M70',0 , FxDataType.Bit)
 #    ret_wr = mc_proc.set_device('M71', 1, FxDataType.Bit)
 #    ret_rd = mc_proc.get_device('Y39', FxDataType.Bit)
-#    ret_rd1 = mc_proc.get_device('Y40', FxDataType.Bit)
+    ret_rd1 = mc_proc.get_device('D402', FxDataType.Signed16)
     ret_rd=mc_proc.get_device('M70', FxDataType.Bit)
     #ret_rd1= mc_proc.get_device('M57', FxDataType.Bit)
 
     print (ret_rd)
-    #print (ret_rd1)
+    print (ret_rd1)
 
     print ("\n")
     time.sleep(3)
