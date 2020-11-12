@@ -323,9 +323,11 @@ class FxDevice:
             self.__value = float(struct.unpack('f', byte_data[:4])[0])
         elif self.__fx_data_type == FxDataType.Bit:
             val_str = str(byte_data[:1][0])
-            c = BitArray(hex=val_str)
-            binary_val = c.bin
-            bool_val = c.bin[3]
+            bool_val = int(val_str) % 2
+            # c = BitArray(hex=val_str)
+            # binary_val = c.bin
+            # print(binary_val)
+            # bool_val = c.bin[0]
             self.__value = bool_val
             #self.__value = int.from_bytes(byte_data[:2],'little', signed=True)  # temporary Bitは16bitと同じにする
         pass
