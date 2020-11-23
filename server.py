@@ -24,8 +24,8 @@ def thread_function1(plc):
         # Connect to PLC to read/insert values from/into table Device_Description/address_table_name
         mydb = mysql.connector.connect(
         host="localhost",
-        user="user1",
-        password = "Memak123.",
+        user="user",
+        password = "Zdopfut89.",
         database="mydb"
         )
         
@@ -47,6 +47,7 @@ def thread_function1(plc):
 
             # Read value of each address from PLC
             for address in address_array:
+                time.sleep(0.004) 
                 address_table_name = address[5]
                 is_address_interval = special_match(address[1])
                 # Write string
@@ -78,17 +79,18 @@ def thread_function1(plc):
                     else:
                         address_value = mc_proc.get_device(address[1], FxDataType.Signed16)
                     #print(address[1], address_value)
+
                     calc_col = address[4]
                     if calc_col is not None:
                         replaced_calc_col = calc_col.replace("x",str(address_value[0]))
                         replaced_calc_col_result = eval(replaced_calc_col)
-                        # print(replaced_calc_col_result)
-                        address_value[0] = replaced_calc_col_result
+                        address_value[0] = int(replaced_calc_col_result)
 
                     if address_value is None:
                         print("unable to connect to plc ", plc[0])
                         break                        
-                        
+                    if int(address_value[0]) < 0:
+                        address_value[0] = 0    
                     elif address_table_name == "Device_Log":
                         # Query to read values of current address from table Device_Log and select the last one
                         mycursor3 = mydb.cursor()
@@ -99,8 +101,8 @@ def thread_function1(plc):
                             # Connect to PLC to read/insert values from/into table Device_Description/Device_Log
                             mydb3 = mysql.connector.connect(
                                 host="localhost",
-                                user="user1",
-                                password = "Memak123.",
+                                user="user",
+                                password = "Zdopfut89.",
                                 database="mydb"
                                 )
 
@@ -125,8 +127,8 @@ def thread_function1(plc):
                                 # Connect to PLC to read/insert values from/into table Device_Description/Device_Log
                                 mydb3 = mysql.connector.connect(
                                     host="localhost",
-                                    user="user1",
-                                    password = "Memak123.",
+                                    user="user",
+                                    password = "Zdopfut89.",
                                     database="mydb"
                                     )
 
@@ -146,8 +148,8 @@ def thread_function1(plc):
                                 if address[3] and address_value[0]:
                                     mydb4 = mysql.connector.connect(
                                         host="localhost",
-                                        user="user1",
-                                        password = "Memak123.",
+                                        user="user",
+                                        password = "Zdopfut89.",
                                         database="mydb"
                                         )
                                     # Query to read addresses from table Device_Description
@@ -183,8 +185,8 @@ def thread_function1(plc):
                             # Connect to PLC to read/insert values from/into table Device_Description/Raw
                             mydb3 = mysql.connector.connect(
                                 host="localhost",
-                                user="user1",
-                                password = "Memak123.",
+                                user="user",
+                                password = "Zdopfut89.",
                                 database="mydb"
                                 )
 
@@ -210,8 +212,8 @@ def thread_function1(plc):
                                 # Connect to PLC to read/insert values from/into table Device_Description/Device_Log
                                 mydb3 = mysql.connector.connect(
                                     host="localhost",
-                                    user="user1",
-                                    password = "Memak123.",
+                                    user="user",
+                                    password = "Zdopfut89.",
                                     database="mydb"
                                     )
 
